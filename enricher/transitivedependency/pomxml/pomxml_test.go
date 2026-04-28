@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	cpb "github.com/google/osv-scalibr/binary/proto/config_go_proto"
 	"github.com/google/osv-scalibr/clients/clienttest"
 	"github.com/google/osv-scalibr/clients/datasource"
 	"github.com/google/osv-scalibr/clients/resolution"
@@ -31,6 +30,7 @@ import (
 	"github.com/google/osv-scalibr/extractor/filesystem/language/java/javalockfile"
 	scalibrfs "github.com/google/osv-scalibr/fs"
 	"github.com/google/osv-scalibr/inventory"
+	"github.com/google/osv-scalibr/plugin/config/configtest"
 	"github.com/google/osv-scalibr/purl"
 )
 
@@ -142,7 +142,7 @@ func TestEnricher_Enrich(t *testing.T) {
 
 	resolutionClient := clienttest.NewMockResolutionClient(t, "testdata/universe/basic-universe.yaml")
 
-	enrichy, err := pomxml.New(&cpb.PluginConfig{})
+	enrichy, err := pomxml.New(configtest.NewFakePluginConfig())
 
 	if err != nil {
 		t.Fatalf("failed to create enricher: %v", err)
@@ -333,7 +333,7 @@ func TestEnricher_Enrich_NonJarFiltering(t *testing.T) {
 
 	resolutionClient := clienttest.NewMockResolutionClient(t, "testdata/universe/basic-universe.yaml")
 
-	enrichy, err := pomxml.New(&cpb.PluginConfig{})
+	enrichy, err := pomxml.New(configtest.NewFakePluginConfig())
 
 	if err != nil {
 		t.Fatalf("failed to create enricher: %v", err)
@@ -554,7 +554,7 @@ func TestEnricher_Enrich_LocalModules(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 
-	enrichy, err := pomxml.New(&cpb.PluginConfig{})
+	enrichy, err := pomxml.New(configtest.NewFakePluginConfig())
 	if err != nil {
 		t.Fatalf("failed to create enricher: %v", err)
 	}
