@@ -29,6 +29,8 @@ import (
 	ospurl "github.com/google/osv-scalibr/extractor/filesystem/os/purl"
 	rpmmeta "github.com/google/osv-scalibr/extractor/filesystem/os/rpm/metadata"
 	snapmeta "github.com/google/osv-scalibr/extractor/filesystem/os/snap/metadata"
+	cdxmeta "github.com/google/osv-scalibr/extractor/filesystem/sbom/cdx/metadata"
+	spdxmeta "github.com/google/osv-scalibr/extractor/filesystem/sbom/spdx/metadata"
 	"github.com/google/osv-scalibr/purl"
 )
 
@@ -1002,6 +1004,62 @@ func TestMakePackageURLNix(t *testing.T) {
 			got := ospurl.MakePackageURL(pkgName, pkgVersion, purl.TypeNix, tt.metadata)
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Errorf("ospurl.MakePackageURL(%v): unexpected PURL (-want +got):\n%s", tt.metadata, diff)
+			}
+		})
+	}
+}
+
+func TestMakeEcosystemSBOM(t *testing.T) {
+	tests := []struct {
+		desc     string
+		metadata any
+		want     string
+	}{
+		{
+			desc: "SPDX Alpine",
+			metadata: &spdxmeta.Metadata{
+				PURL: &purl.PackageURL{
+					Type:       purl.TypeApk,
+					Namespace:  "alpine",
+					Name:       "nginx",
+					Version:    "1.18.0",
+					Qualifiers: purl.QualifiersFromMap(map[string]string{"distro": "v3.18"}),
+				},
+			},
+			want: "Alpine:v3.18",
+		},
+		{
+			desc: "CDX Alpine",
+			metadata: &cdxmeta.Metadata{
+				PURL: &purl.PackageURL{
+					Type:       purl.TypeApk,
+					Namespace:  "alpine",
+					Name:       "nginx",
+					Version:    "1.18.0",
+					Qualifiers: purl.QualifiersFromMap(map[string]string{"distro": "v3.18"}),
+				},
+			},
+			want: "Alpine:v3.18",
+		},
+		{
+			desc: "SPDX Wolfi",
+			metadata: &spdxmeta.Metadata{
+				PURL: &purl.PackageURL{
+					Type:      purl.TypeApk,
+					Namespace: "wolfi",
+					Name:      "nginx",
+					Version:   "1.18.0",
+				},
+			},
+			want: "Wolfi",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			got := ecosystem.MakeEcosystem(tt.metadata)
+			if diff := cmp.Diff(tt.want, got.String()); diff != "" {
+				t.Errorf("ecosystem.MakeEcosystem(%v) (-want +got):\n%s", tt.metadata, diff)
 			}
 		})
 	}
